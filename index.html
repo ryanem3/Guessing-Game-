@@ -1,43 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>Speak Number Guessing Game</title>
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <img src="photo/mic.png" alt="Microphone to speak into" />
-    <h1>Guess a Number Between 1 – 100</h1>
-    <h3>Speak the number into your microphone</h3>
-    <div id="msg" class="msg"></div>
-  </body>
-</html>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="stylesheet" href="styles.css" />
-  <title>My Voice Assistant</title>
+  <title>Number Game & Voice Assistant</title>
   <script src="script.js" defer></script>
 </head>
+
 <body>
-  <img src="photo/mic.png" alt="Microphone" />
 
-  <h1>My Voice Assistant</h1>
-  <h3>Say "Tell me a dad joke"</h3>
+  <!-- NUMBER GUESSING GAME -->
+  <section class="game-section">
+    <img src="photo/mic.png" alt="Microphone" />
 
-  <button id="listenBtn">Start Listening</button>
+    <h1>Guess a Number Between 1 – 100</h1>
+    <h3>Speak the number into your microphone</h3>
 
-  <div id="msg" class="msg"></div>
-  <div id="joke" class="joke"></div>
-  <button id="listenBtn">Start Listening</button>
+    <button id="numberBtn">Number Game</button>
 
-<div id="msg" class="msg"></div>
+    <div id="numberMsg" class="msg" aria-live="polite"></div>
+  </section>
 
-<div id="joke" class="joke"></div>
+  <!-- DAD JOKE VOICE ASSISTANT -->
+  <section class="game-section">
+    <img src="photo/mic.png" alt="Microphone" />
+
+    <h1>My Voice Assistant</h1>
+    <h3>Say "Tell me a dad joke"</h3>
+
+    <button id="listenBtn">Dad Joke</button>
+
+    <div id="msg" class="msg" aria-live="polite"></div>
+    <div id="joke" class="joke" aria-live="polite"></div>
+  </section>
+
 </body>
 </html>
