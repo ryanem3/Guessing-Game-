@@ -1,128 +1,119 @@
 
 const msgEl = document.getElementById('msg');
-
-// Generate random number
-function getRandomNumber() {
-  return Math.floor(Math.random() * 100) + 1;
-}
-
-const randomNum = getRandomNumber();
-console.log('Number:', randomNum);
+const jokeEl = document.getElementById('joke');
+const listenBtn = document.getElementById('listenBtn');
 
 // Set up speech recognition
-window.SpeechRecognition =
+const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 
-let recognition = new window.SpeechRecognition();
+let recognition;
 
-// Start recognition and game
-recognition.start();
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
 
-// Capture user speech
+  // Start listening when button is clicked
+  listenBtn.addEventListener('click', () => {
+    window.speechSynthesis.cancel();
+    recognition.start();
+  });
+
+  // Capture what the user says
+  recognition.addEventListener('result', onSpeak);
+
+  recognition.addEventListener('start', () => {
+    listenBtn.disabled = true;
+    msgEl.textContent = 'Listening...';
+  });
+
+  recognition.addEventListener('end', () => {
+    listenBtn.disabled = false;
+  });
+
+  recognition.addEventListener('error', (event) => {
+    msgEl.textContent = 'Microphone error: ' + event.error;
+    listenBtn.disabled = false;
+  });
+
+} else {
+  msgEl.textContent = 'Speech recognition is not supported in this browser.';
+  listenBtn.disabled = true;
+}
+
+// Understand what the user says
 function onSpeak(event) {
   const msg = event.results[0][0].transcript;
-  console.log(msg);
 
-  writeMessage(msg);
-  checkNumber(msg);
+  console.log('You said:', msg);
+  msgEl.textContent = 'You said: ' + msg;
+
+  checkCommand(msg);
 }
 
-// Write what user speaks
-function writeMessage(msg) {
-  msgEl.innerHTML = '';
+// Check the spoken command
+function checkCommand(msg) {
+  const command = msg.toLowerCase();
 
-  const div = document.createElement('div');
-  div.textContent = 'You said: ';
-
-  const span = document.createElement('span');
-  span.classList.add('box');
-  span.textContent = msg;
-
-  msgEl.append(div, span);
-}
-
-// Check message against secret number
-function checkNumber(msg) {
-
-  // Convert spoken words into numbers
-  const wordToNumber = {
-    one: 1,
-    won: 1,
-    two: 2,
-    to: 2,
-    too: 2,
-    three: 3,
-    four: 4,
-    for: 4,
-    five: 5,
-    six: 6,
-    seven: 7,
-    eight: 8,
-    ate: 8,
-    nine: 9,
-    ten: 10,
-  };
-
-  msg = msg.toLowerCase().trim();
-
-  if (wordToNumber[msg]) {
-    console.log(`adjusting ${msg} to ${wordToNumber[msg]}`);
-    msg = wordToNumber[msg];
-  }
-
-  const num = Number(msg);
-
-  // Check if spoken content is a valid number
-  if (msg === '' || Number.isNaN(num)) {
-    const div = document.createElement('div');
-    div.textContent = 'That is not a valid number';
-    msgEl.append(div);
-
-    return;
-  }
-
-  // Check if number is in range
-  if (num < 1 || num > 100) {
-    const div = document.createElement('div');
-    div.textContent = 'Number must be between 1 and 100';
-    msgEl.append(div);
-
-    return;
-  }
-
-  // Check number and provide feedback
-  if (num === randomNum) {
-    const h2 = document.createElement('h2');
-    h2.textContent = `Congrats! You have guessed the number! It was ${num}`;
-
-    const button = document.createElement('button');
-    button.classList.add('play-again');
-    button.id = 'play-again';
-    button.textContent = 'Play Again';
-
-    // Add listener to Play Again button
-    button.addEventListener('click', () => window.location.reload());
-
-    msgEl.append(h2, button);
-
-  } else if (num > randomNum) {
-    const div = document.createElement('div');
-    div.textContent = 'GO LOWER';
-    msgEl.append(div);
-
+  if (
+    command.includes('dad joke') ||
+    command.includes('tell me a joke')
+  ) {
+    getDadJoke();
   } else {
-    const div = document.createElement('div');
-    div.textContent = 'GO HIGHER';
-    msgEl.append(div);
+    const response = 'Sorry, I did not understand. Please ask me to tell you a dad joke.';
+
+    jokeEl.textContent = response;
+    speak(response);
   }
 }
 
-// Listen for spoken results
-recognition.addEventListener('result', onSpeak);
+// Get a dad joke from the API
+async function getDadJoke() {
+  jokeEl.textContent = 'Finding a dad joke...';
 
-// Restart speech recognition when it ends
-recognition.addEventListener('end', () => {
-  if (!document.getElementById('play-again')) {
-    recognition.start();
+  try {
+    const response = await fetch('https://icanhazdadjoke.com/', {
+      headers: {
+        Accept: 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Could not fetch joke');
+    }
+
+    const data = await response.json();
+    const joke = data.joke;
+
+    jokeEl.textContent = joke;
+
+    // Read the joke aloud
+    speak(joke);
+
+  } catch (error) {
+    console.error(error);
+
+    const response = 'Sorry, I could not get a dad joke right now.';
+
+    jokeEl.textContent = response;
+    speak(response);
   }
-});
+}
+
+// Make the assistant speak
+function speak(text) {
+  if (!('speechSynthesis' in window)) {
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(text);
+
+  speech.lang = 'en-US';
+  speech.rate = 0.9;
+  speech.pitch = 1;
+
+  window.speechSynthesis.speak(speech);
+}
